@@ -75,11 +75,7 @@
         "85633813"
       ]
     },
-    "transit": {
-      "datapath": "/data/transit",
-      "feeds": [
-      ]
-    },
+    "transit": {},
     "interpolation": {}
   }
 }
