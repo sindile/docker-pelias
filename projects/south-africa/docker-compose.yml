@@ -44,7 +44,6 @@ services:
     volumes:
       - "./pelias.json:/code/pelias.json"
       - "${DATA_DIR}:/data"
-      - "${DATA_DIR}/tmp:/tmp"
   openaddresses:
     image: pelias/openaddresses:master
     container_name: pelias_openaddresses
