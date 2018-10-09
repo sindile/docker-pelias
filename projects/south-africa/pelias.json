@@ -29,8 +29,12 @@
       "libpostal": { "url": "http://libpostal:4400" },
       "placeholder": { "url": "http://placeholder:4100" },
       "interpolation": { "url": "http://interpolation:4300" }
+    },
+    "defaultParameters": {
+      "focus.point.lat": -28.88,
+      "focus.point.lon": 24.06
     }
-  },
+},
   "imports": {
     "adminLookup": {
       "enabled": true
@@ -70,21 +74,6 @@
       "importPlace": [
         "85633813"
       ]
-    },
-    "transit": {
-      "datapath": "/data/transit",
-      "feeds": [
-      ]
-    },
-    "interpolation": {
-      "download": {
-        "tiger": {
-          "datapath": "/data/tiger",
-          "states": [
-            { "state_code": 41, "county_code": 67, "name": "Washington County, OR" }
-          ]
-        }
-      }
     }
   }
 }
