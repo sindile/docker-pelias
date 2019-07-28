@@ -4,6 +4,7 @@
     "timestamp": false
   },
   "esclient": {
+    "apiVersion": "5.6",
     "hosts": [
       { "host": "elasticsearch" }
     ]
@@ -65,11 +66,6 @@
       "importPostalcodes": true,
       "importPlace": [
         "85632793"
-      ]
-    },
-    "transit": {
-      "datapath": "/data/transit",
-      "feeds": [
       ]
     },
     "interpolation": {

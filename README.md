@@ -1,40 +1,92 @@
 
 # Pelias in Docker
 
-This repository contains a framework for downloading/preparing and building the the [Pelias Geocoder](https://github.com/pelias/pelias) using Docker and [Docker Compose](https://github.com/docker/compose#docker-compose).
+This repository contains a framework for downloading/preparing and building the [Pelias Geocoder](https://github.com/pelias/pelias) using Docker and [Docker Compose](https://github.com/docker/compose#docker-compose).
 
 ## Projects
 
 Example projects are included in the [projects](https://github.com/pelias/docker/tree/master/projects) directory.
 
-We recommend you start with the `portland-metro` example as a first-time user; once you have successfully completed a build you can use this as a base to create your own projects.
+We recommend you start with the `portland-metro` example as a first-time user: it has lower disk and time requirements and can be used to help you familiarize yourself with the process.
 
-## Not suitable for large geographies
-
-We do not recommend running large extracts (anything larger than a US State) inside Docker, the scripts are **not suitable** for full planet builds. If you require global coverage, please see our [install documentation](https://github.com/pelias/documentation/blob/master/getting_started_install.md) or consider using the [geocode.earth](https://geocode.earth/) services hosted by members of our core team.
+Once you have successfully completed a small build you can use this as a base to create your own projects or move on to larger projects.
 
 ## Prerequisites
 
 You will need to have `docker` and `docker-compose` installed before continuing. If you are not using the latest version, please mention that in any bugs reports.
 
-If you are running OSX, you should also install `brew install coreutils` and max-out your Docker limits in `Docker > Preferences > Advanced`.
+## Requirements for Mac OSX
+- install GNU coreutils with [Homebrew](https://brew.sh/): `brew install coreutils`.
+- Max-out Docker computing resources( `Memory-RAM and CPUs-Cores` ) dedicated to Docker in `Docker > Preferences > Advanced`.
+
+## System requirements
 
 Scripts can easily download tens of GB of geographic data, so ensure you have enough free disk space!
 
-## Installing the Pelias command
+At least 8GB RAM is required.
+
+## Quickstart build script
+
+The following shell script can be used to quickly get started with a Pelias build.
+
+Feel free to modify the code and data locations to suit your needs.
+
+```bash
+#!/bin/bash
+set -x
+
+# create directories
+mkdir /code /data
+
+# set proper permissions. make sure the user matches your `DOCKER_USER` setting in `.env`
+chown 1000:1000 /code /data
+
+# clone repo
+cd /code
+git clone https://github.com/pelias/docker.git
+cd docker
+
+# install pelias script
+ln -s "$(pwd)/pelias" /usr/local/bin/pelias
+
+# cwd
+cd projects/portland-metro
+
+# configure environment
+sed -i '/DATA_DIR/d' .env
+echo 'DATA_DIR=/data' >> .env
+
+# run build
+pelias compose pull
+pelias elastic start
+pelias elastic wait
+pelias elastic create
+pelias download all
+pelias prepare all
+pelias import all
+pelias compose up
+
+# optionally run tests
+pelias test run
+```
+
+
+## Installing the Pelias helper script
+
+This repository makes use of a helper script to make basic management of the Pelias Docker images easy.
 
 If you haven't done so already, you will need to ensure the `pelias` command is available on your path.
 
 You can find the `pelias` file in the root of this repository.
 
-Advanced users may have a preferance how this is done on their system, but a basic example would be to do something like:
+Advanced users may have a preference how this is done on their system, but a basic example would be to do something like:
 
 ```bash
 git clone https://github.com/pelias/docker.git ~/pelias
 ln -s ~/pelias/pelias /usr/local/bin/pelias
 ```
 
-Once the command is correctly installed you should be able to run the following command to confim the pelias command is available on your path:
+Once the command is correctly installed you should be able to run the following command to confirm the pelias command is available on your path:
 
 ```bash
 which pelias
@@ -103,6 +155,8 @@ All processes in Pelias containers are run as non-root users. By default, the UI
 This variable can take just a UID or a UID:GID combination such as `1000:1000`. See the [docker-compose](https://docs.docker.com/compose/compose-file/#domainname-hostname-ipc-mac_address-privileged-read_only-shm_size-stdin_open-tty-user-working_dir) and [docker run](https://docs.docker.com/engine/reference/run/#user) documentation on controlling Docker container users for more information.
 
 ## CLI commands
+
+The following is a list of all supported CLI commands.
 
 ```bash
 $ pelias 
@@ -241,44 +295,26 @@ The test command runs the [fuzzy-tester](https://github.com/pelias/fuzzy-tester)
 test      run                      run fuzzy-tester test cases
 ```
 
-## Generic build workflow
+## Optionally cleanup temporary files
 
-The following shell script can be used to automate a build:
+Once the build is complete, you can cleanup temporary files that are no longer useful. The numbers in this snippet below are rough estimates for a full planet build.
 
-```bash
-#!/bin/bash
-set -x
+```
+# These folders can be entirely deleted after the import into elastic search
+rm -rf /data/openaddresses #(~43GB)
+rm -rf /data/tiger #(~13GB)
+rm -rf /data/openstreetmap #(~46GB)
+rm -rf /data/polylines #(~2.7GB)
 
-# create directories
-mkdir /code /data
+# Within the content of the "interpolation" folder (~176GB) we must
+# preserve "street.db" (~7GB) and "address.db" (~25GB), the rest can be deleted
+cd /data/interpolation
+rm -rf -- !("street.db"|"address.db")
 
-# clone repo
-cd /code
-git clone https://github.com/pelias/docker.git
-cd docker
-
-# install pelias script
-ln -s "$(pwd)/pelias" /usr/local/bin/pelias
-
-# cwd
-cd projects/portland-metro
-
-# configure environment
-sed -i '/DATA_DIR/d' .env
-echo 'DATA_DIR=/data' >> .env
-
-# run build
-pelias compose pull
-pelias elastic start
-pelias elastic wait
-pelias elastic create
-pelias download all
-pelias prepare all
-pelias import all
-pelias compose up
-
-# optionally run tests
-pelias test run
+# Within the content of the "placeholder" folder (~1.4GB), we must
+# preserve the "store.sqlite3" (~0.9GB) file, the rest can be deleted
+cd /data/placeholder
+rm -rf -- !("store.sqlite3")
 ```
 
 ## View status of running containers

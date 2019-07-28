@@ -36,6 +36,7 @@ services:
     volumes:
       - "./pelias.json:/code/pelias.json"
       - "${DATA_DIR}:/data"
+      - "./blacklist/:/data/blacklist"
   whosonfirst:
     image: pelias/whosonfirst:master
     container_name: pelias_whosonfirst
@@ -58,6 +59,14 @@ services:
     volumes:
       - "./pelias.json:/code/pelias.json"
       - "${DATA_DIR}:/data"
+  csv-importer:
+    image: pelias/csv-importer:master
+    container_name: pelias_csv_importer
+    user: "${DOCKER_USER}"
+    volumes:
+      - "./pelias.json:/code/pelias.json"
+      - "${DATA_DIR}:/data"
+      - "./blacklist/:/data/blacklist"
   transit:
     image: pelias/transit:master
     container_name: pelias_transit
@@ -100,8 +109,9 @@ services:
     volumes:
       - "../../common/preview:/usr/share/nginx/html"
   elasticsearch:
-    image: pelias/elasticsearch
+    image: pelias/elasticsearch:5.6.12
     container_name: pelias_elasticsearch
+    user: "${DOCKER_USER}"
     restart: always
     ports: [ "9200:9200", "9300:9300" ]
     volumes:
