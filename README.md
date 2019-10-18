@@ -15,6 +15,8 @@ Once you have successfully completed a small build you can use this as a base to
 
 You will need to have `docker` and `docker-compose` installed before continuing. If you are not using the latest version, please mention that in any bugs reports.
 
+This project supports Linux and Mac OSX operatings systems. Windows is currently [not supported](https://github.com/pelias/docker/issues/124).
+
 ## Requirements for Mac OSX
 - install GNU coreutils with [Homebrew](https://brew.sh/): `brew install coreutils`.
 - Max-out Docker computing resources( `Memory-RAM and CPUs-Cores` ) dedicated to Docker in `Docker > Preferences > Advanced`.
@@ -333,9 +335,9 @@ You can inspect the container logs for errors by running:
 pelias compose logs
 ```
 
-## Make an example query
+## Example queries
 
-You can now make queries against your new Pelias build:
+Once all the importers have completed and the Pelias services are running, you can make queries against your new Pelias build:
 
 ### API
 
